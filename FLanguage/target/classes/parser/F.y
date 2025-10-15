@@ -27,7 +27,6 @@
 program
     : /* empty */      { $$ = new ArrayList<Object>(); parseResult = $$; }
     | program element  { ((List<Object>) $1).add($2); $$ = $1; parseResult = $$; }
-    | program statement   { ((List<Object>) $1).add($2); $$ = $1; parseResult = $$; }
     ;
 
 list
@@ -91,13 +90,10 @@ atom
 
 element
     : list     { $$ = $1; }
+    | special_form { $$ = $1; }
+    | function { $$ = $1; }
     | literal  { $$ = $1; }
     | atom     { $$ = $1; }
-    ;
-
-    statement
-    : special_form       { $$ = $1; }
-    | function     { $$ = $1; }
     ;
 
 special_form
