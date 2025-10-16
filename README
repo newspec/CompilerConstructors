@@ -1,4 +1,4 @@
 bison -L java -o src/main/java/parser/FParser.java src/main/java/parser/F.y
-flex src/main/java/lexer/F.flex 
+jflex src/main/java/lexer/F.flex 
 javac -d out src/main/java/parser/FParser.java src/main/java/lexer/FScanner.java src/main/java/Main.java src/main/java/parser/TokenValue.java 
 java -cp out Main tests/test1.f
