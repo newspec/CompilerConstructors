@@ -131,26 +131,30 @@ public class FParser
     S_tkIDENT(42),                 /* tkIDENT  */
     S_YYACCEPT(43),                /* $accept  */
     S_program(44),                 /* program  */
-    S_definition_or_statement(45), /* definition_or_statement  */
-    S_list(46),                    /* list  */
-    S_list_elements(47),           /* list_elements  */
-    S_element(48),                 /* element  */
-    S_literal(49),                 /* literal  */
-    S_quoted_identifier(50),       /* quoted_identifier  */
-    S_statement(51),               /* statement  */
-    S_special_form(52),            /* special_form  */
-    S_quote_form(53),              /* quote_form  */
-    S_setq_form(54),               /* setq_form  */
-    S_func_form(55),               /* func_form  */
-    S_lambda_form(56),             /* lambda_form  */
-    S_prog_form(57),               /* prog_form  */
-    S_cond_form(58),               /* cond_form  */
-    S_while_form(59),              /* while_form  */
-    S_return_form(60),             /* return_form  */
-    S_break_form(61),              /* break_form  */
-    S_function_call(62),           /* function_call  */
-    S_func_operator(63),           /* func_operator  */
-    S_argument_list(64);           /* argument_list  */
+    S_list(45),                    /* list  */
+    S_list_elements(46),           /* list_elements  */
+    S_literal(47),                 /* literal  */
+    S_atom(48),                    /* atom  */
+    S_element(49),                 /* element  */
+    S_special_form(50),            /* special_form  */
+    S_quote_form(51),              /* quote_form  */
+    S_setq_form(52),               /* setq_form  */
+    S_func_form(53),               /* func_form  */
+    S_lambda_form(54),             /* lambda_form  */
+    S_prog_form(55),               /* prog_form  */
+    S_cond_form(56),               /* cond_form  */
+    S_while_form(57),              /* while_form  */
+    S_return_form(58),             /* return_form  */
+    S_break_form(59),              /* break_form  */
+    S_function(60),                /* function  */
+    S_arithmetic_function_call(61), /* arithmetic_function_call  */
+    S_operation_on_list_call(62),  /* operation_on_list_call  */
+    S_comparision_call(63),        /* comparision_call  */
+    S_predicate_call(64),          /* predicate_call  */
+    S_logical_operation_call(65),  /* logical_operation_call  */
+    S_evaluation_call(66),         /* evaluation_call  */
+    S_generic_call(67),            /* generic_call  */
+    S_argument_list(68);           /* argument_list  */
 
 
     private final int yycode_;
@@ -205,13 +209,11 @@ public class FParser
       SymbolKind.S_tkIDENT,
       SymbolKind.S_YYACCEPT,
       SymbolKind.S_program,
-      SymbolKind.S_definition_or_statement,
       SymbolKind.S_list,
       SymbolKind.S_list_elements,
-      SymbolKind.S_element,
       SymbolKind.S_literal,
-      SymbolKind.S_quoted_identifier,
-      SymbolKind.S_statement,
+      SymbolKind.S_atom,
+      SymbolKind.S_element,
       SymbolKind.S_special_form,
       SymbolKind.S_quote_form,
       SymbolKind.S_setq_form,
@@ -222,8 +224,14 @@ public class FParser
       SymbolKind.S_while_form,
       SymbolKind.S_return_form,
       SymbolKind.S_break_form,
-      SymbolKind.S_function_call,
-      SymbolKind.S_func_operator,
+      SymbolKind.S_function,
+      SymbolKind.S_arithmetic_function_call,
+      SymbolKind.S_operation_on_list_call,
+      SymbolKind.S_comparision_call,
+      SymbolKind.S_predicate_call,
+      SymbolKind.S_logical_operation_call,
+      SymbolKind.S_evaluation_call,
+      SymbolKind.S_generic_call,
       SymbolKind.S_argument_list
     };
 
@@ -281,11 +289,13 @@ public class FParser
   "tkEQUAL", "tkNONEQUAL", "tkLESS", "tkLESSEQ", "tkGREATER",
   "tkGREATEREQ", "tkISINT", "tkISREAL", "tkISBOOL", "tkISNULL", "tkISATOM",
   "tkISLIST", "tkAND", "tkOR", "tkXOR", "tkNOT", "tkEVAL", "tkIDENT",
-  "$accept", "program", "definition_or_statement", "list", "list_elements",
-  "element", "literal", "quoted_identifier", "statement", "special_form",
-  "quote_form", "setq_form", "func_form", "lambda_form", "prog_form",
-  "cond_form", "while_form", "return_form", "break_form", "function_call",
-  "func_operator", "argument_list", null
+  "$accept", "program", "list", "list_elements", "literal", "atom",
+  "element", "special_form", "quote_form", "setq_form", "func_form",
+  "lambda_form", "prog_form", "cond_form", "while_form", "return_form",
+  "break_form", "function", "arithmetic_function_call",
+  "operation_on_list_call", "comparision_call", "predicate_call",
+  "logical_operation_call", "evaluation_call", "generic_call",
+  "argument_list", null
     };
   }
 
@@ -589,411 +599,826 @@ public class FParser
           case 2: /* program: %empty  */
   if (yyn == 2)
     /* "src/main/java/parser/F.y":28  */
-        { yyval = new ArrayList<Object>(); parseResult = yyval; };
+                       { yyval = new ArrayList<Object>(); parseResult = yyval; };
   break;
 
 
-  case 3: /* program: program definition_or_statement  */
+  case 3: /* program: program element  */
   if (yyn == 3)
-    /* "src/main/java/parser/F.y":30  */
-        { ((List<Object>)yystack.valueAt (1)).add(yystack.valueAt (0)); yyval = yystack.valueAt (1); parseResult = yyval; };
+    /* "src/main/java/parser/F.y":29  */
+                       { ((List<Object>) yystack.valueAt (1)).add(yystack.valueAt (0)); yyval = yystack.valueAt (1); parseResult = yyval; };
   break;
 
 
-  case 6: /* list: tkLPAREN list_elements tkRPAREN  */
-  if (yyn == 6)
-    /* "src/main/java/parser/F.y":41  */
-        { yyval = yystack.valueAt (1); };
+  case 4: /* list: tkLPAREN list_elements tkRPAREN  */
+  if (yyn == 4)
+    /* "src/main/java/parser/F.y":33  */
+                                       { yyval = yystack.valueAt (1); };
   break;
 
 
-  case 7: /* list_elements: %empty  */
-  if (yyn == 7)
-    /* "src/main/java/parser/F.y":46  */
+  case 5: /* list_elements: %empty  */
+  if (yyn == 5)
+    /* "src/main/java/parser/F.y":38  */
         { yyval = new ArrayList<Object>(); };
   break;
 
 
-  case 8: /* list_elements: list_elements element  */
+  case 6: /* list_elements: list_elements element  */
+  if (yyn == 6)
+    /* "src/main/java/parser/F.y":40  */
+        { ((List<Object>) yystack.valueAt (1)).add(yystack.valueAt (0)); yyval = yystack.valueAt (1); };
+  break;
+
+
+  case 7: /* literal: tkINT  */
+  if (yyn == 7)
+    /* "src/main/java/parser/F.y":44  */
+               { yyval = new parser.TokenValue("INT", yystack.valueAt (0)); };
+  break;
+
+
+  case 8: /* literal: tkREAL  */
   if (yyn == 8)
-    /* "src/main/java/parser/F.y":48  */
-        { ((List<Object>)yystack.valueAt (1)).add(yystack.valueAt (0)); yyval = yystack.valueAt (1); };
+    /* "src/main/java/parser/F.y":45  */
+               { yyval = new parser.TokenValue("REAL", yystack.valueAt (0)); };
   break;
 
 
-  case 12: /* literal: tkINT  */
+  case 9: /* literal: tkBOOL  */
+  if (yyn == 9)
+    /* "src/main/java/parser/F.y":46  */
+               { yyval = new parser.TokenValue("BOOL", yystack.valueAt (0)); };
+  break;
+
+
+  case 10: /* literal: tkNULL  */
+  if (yyn == 10)
+    /* "src/main/java/parser/F.y":47  */
+               { yyval = new parser.TokenValue("NULL", null); };
+  break;
+
+
+  case 11: /* atom: tkSETQ  */
+  if (yyn == 11)
+    /* "src/main/java/parser/F.y":51  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 12: /* atom: tkFUNC  */
   if (yyn == 12)
-    /* "src/main/java/parser/F.y":60  */
-              { yyval = new parser.TokenValue("INT",    yystack.valueAt (0)); };
+    /* "src/main/java/parser/F.y":52  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 13: /* literal: tkREAL  */
+  case 13: /* atom: tkLAMBDA  */
   if (yyn == 13)
-    /* "src/main/java/parser/F.y":61  */
-              { yyval = new parser.TokenValue("REAL",   yystack.valueAt (0)); };
+    /* "src/main/java/parser/F.y":53  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 14: /* literal: tkBOOL  */
+  case 14: /* atom: tkPROG  */
   if (yyn == 14)
-    /* "src/main/java/parser/F.y":62  */
-              { yyval = new parser.TokenValue("BOOL",   yystack.valueAt (0)); };
+    /* "src/main/java/parser/F.y":54  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 15: /* literal: tkNULL  */
+  case 15: /* atom: tkCOND  */
   if (yyn == 15)
-    /* "src/main/java/parser/F.y":63  */
-              { yyval = new parser.TokenValue("NULL",   null); };
+    /* "src/main/java/parser/F.y":55  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 16: /* quoted_identifier: tkQUOTE tkIDENT  */
+  case 16: /* atom: tkWHILE  */
   if (yyn == 16)
-    /* "src/main/java/parser/F.y":69  */
-        {
-          yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0));
-        };
+    /* "src/main/java/parser/F.y":56  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 17: /* quoted_identifier: tkIDENT  */
+  case 17: /* atom: tkRETURN  */
   if (yyn == 17)
-    /* "src/main/java/parser/F.y":73  */
-        {
-          yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0));
-        };
+    /* "src/main/java/parser/F.y":57  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 29: /* quote_form: tkLPAREN tkQUOTE element tkRPAREN  */
+  case 18: /* atom: tkBREAK  */
+  if (yyn == 18)
+    /* "src/main/java/parser/F.y":58  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 19: /* atom: tkPLUS  */
+  if (yyn == 19)
+    /* "src/main/java/parser/F.y":60  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 20: /* atom: tkMINUS  */
+  if (yyn == 20)
+    /* "src/main/java/parser/F.y":61  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 21: /* atom: tkTIMES  */
+  if (yyn == 21)
+    /* "src/main/java/parser/F.y":62  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 22: /* atom: tkDIVIDE  */
+  if (yyn == 22)
+    /* "src/main/java/parser/F.y":63  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 23: /* atom: tkHEAD  */
+  if (yyn == 23)
+    /* "src/main/java/parser/F.y":65  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 24: /* atom: tkTAIL  */
+  if (yyn == 24)
+    /* "src/main/java/parser/F.y":66  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 25: /* atom: tkCONS  */
+  if (yyn == 25)
+    /* "src/main/java/parser/F.y":67  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 26: /* atom: tkEQUAL  */
+  if (yyn == 26)
+    /* "src/main/java/parser/F.y":69  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 27: /* atom: tkNONEQUAL  */
+  if (yyn == 27)
+    /* "src/main/java/parser/F.y":70  */
+                    { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 28: /* atom: tkLESS  */
+  if (yyn == 28)
+    /* "src/main/java/parser/F.y":71  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 29: /* atom: tkLESSEQ  */
   if (yyn == 29)
-    /* "src/main/java/parser/F.y":100  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("QUOTE","quote"));
-          f.add(yystack.valueAt (1));
-          yyval = f;
-        };
+    /* "src/main/java/parser/F.y":72  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 30: /* setq_form: tkLPAREN tkSETQ quoted_identifier element tkRPAREN  */
+  case 30: /* atom: tkGREATER  */
   if (yyn == 30)
-    /* "src/main/java/parser/F.y":111  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("SETQ","setq"));
-          f.add(yystack.valueAt (2));
-          f.add(yystack.valueAt (1));
-          yyval = f;
-        };
+    /* "src/main/java/parser/F.y":73  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 31: /* func_form: tkLPAREN tkFUNC quoted_identifier list element tkRPAREN  */
+  case 31: /* atom: tkGREATEREQ  */
   if (yyn == 31)
-    /* "src/main/java/parser/F.y":123  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("FUNC","func"));
-          f.add(yystack.valueAt (3));
-          f.add(yystack.valueAt (2));
-          f.add(yystack.valueAt (1));
-          yyval = f;
-        };
+    /* "src/main/java/parser/F.y":74  */
+                    { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
   break;
 
 
-  case 32: /* lambda_form: tkLPAREN tkLAMBDA list element tkRPAREN  */
+  case 32: /* atom: tkISINT  */
   if (yyn == 32)
-    /* "src/main/java/parser/F.y":136  */
+    /* "src/main/java/parser/F.y":76  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 33: /* atom: tkISREAL  */
+  if (yyn == 33)
+    /* "src/main/java/parser/F.y":77  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 34: /* atom: tkISBOOL  */
+  if (yyn == 34)
+    /* "src/main/java/parser/F.y":78  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 35: /* atom: tkISNULL  */
+  if (yyn == 35)
+    /* "src/main/java/parser/F.y":79  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 36: /* atom: tkISATOM  */
+  if (yyn == 36)
+    /* "src/main/java/parser/F.y":80  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 37: /* atom: tkISLIST  */
+  if (yyn == 37)
+    /* "src/main/java/parser/F.y":81  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 38: /* atom: tkAND  */
+  if (yyn == 38)
+    /* "src/main/java/parser/F.y":83  */
+            { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 39: /* atom: tkOR  */
+  if (yyn == 39)
+    /* "src/main/java/parser/F.y":84  */
+            { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 40: /* atom: tkXOR  */
+  if (yyn == 40)
+    /* "src/main/java/parser/F.y":85  */
+            { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 41: /* atom: tkNOT  */
+  if (yyn == 41)
+    /* "src/main/java/parser/F.y":86  */
+            { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 42: /* atom: tkEVAL  */
+  if (yyn == 42)
+    /* "src/main/java/parser/F.y":87  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 43: /* atom: tkIDENT  */
+  if (yyn == 43)
+    /* "src/main/java/parser/F.y":88  */
+                { yyval = new parser.TokenValue("IDENTIFIER", yystack.valueAt (0)); };
+  break;
+
+
+  case 44: /* element: list  */
+  if (yyn == 44)
+    /* "src/main/java/parser/F.y":93  */
+               { yyval = yystack.valueAt (0); };
+  break;
+
+
+  case 45: /* element: special_form  */
+  if (yyn == 45)
+    /* "src/main/java/parser/F.y":94  */
+                   { yyval = yystack.valueAt (0); };
+  break;
+
+
+  case 46: /* element: function  */
+  if (yyn == 46)
+    /* "src/main/java/parser/F.y":95  */
+               { yyval = yystack.valueAt (0); };
+  break;
+
+
+  case 47: /* element: literal  */
+  if (yyn == 47)
+    /* "src/main/java/parser/F.y":96  */
+               { yyval = yystack.valueAt (0); };
+  break;
+
+
+  case 48: /* element: atom  */
+  if (yyn == 48)
+    /* "src/main/java/parser/F.y":97  */
+               { yyval = yystack.valueAt (0); };
+  break;
+
+
+  case 58: /* quote_form: tkQUOTE list  */
+  if (yyn == 58)
+    /* "src/main/java/parser/F.y":114  */
         {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("LAMBDA","lambda"));
-          f.add(yystack.valueAt (2));
-          f.add(yystack.valueAt (1));
-          yyval = f;
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("QUOTE", "quote"));
+            form.add(yystack.valueAt (0));
+            yyval = form;
         };
   break;
 
 
-  case 33: /* prog_form: tkLPAREN tkPROG list list_elements tkRPAREN  */
-  if (yyn == 33)
+  case 59: /* quote_form: tkQUOTE atom  */
+  if (yyn == 59)
+    /* "src/main/java/parser/F.y":121  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("QUOTE", "quote"));
+            form.add(yystack.valueAt (0));
+            yyval = form;
+        };
+  break;
+
+
+  case 60: /* quote_form: tkQUOTE literal  */
+  if (yyn == 60)
+    /* "src/main/java/parser/F.y":128  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("QUOTE", "quote"));
+            form.add(yystack.valueAt (0));
+            yyval = form;
+        };
+  break;
+
+
+  case 61: /* quote_form: tkLPAREN tkQUOTE element tkRPAREN  */
+  if (yyn == 61)
+    /* "src/main/java/parser/F.y":135  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("QUOTE", "quote"));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
+  break;
+
+
+  case 62: /* setq_form: tkLPAREN tkSETQ atom element tkRPAREN  */
+  if (yyn == 62)
     /* "src/main/java/parser/F.y":148  */
         {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("PROG","prog"));
-          f.add(yystack.valueAt (2));
-          f.add(yystack.valueAt (1));
-          yyval = f;
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("SETQ", "setq"));
+            form.add(yystack.valueAt (2));
+            form.add(yystack.valueAt (1));
+            yyval = form;
         };
   break;
 
 
-  case 34: /* cond_form: tkLPAREN tkCOND element element tkRPAREN  */
-  if (yyn == 34)
-    /* "src/main/java/parser/F.y":160  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("COND","cond"));
-          f.add(yystack.valueAt (2)); f.add(yystack.valueAt (1));
-          yyval = f;
-        };
-  break;
-
-
-  case 35: /* cond_form: tkLPAREN tkCOND element element element tkRPAREN  */
-  if (yyn == 35)
-    /* "src/main/java/parser/F.y":167  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("COND","cond"));
-          f.add(yystack.valueAt (3)); f.add(yystack.valueAt (2)); f.add(yystack.valueAt (1));
-          yyval = f;
-        };
-  break;
-
-
-  case 36: /* while_form: tkLPAREN tkWHILE element element tkRPAREN  */
-  if (yyn == 36)
-    /* "src/main/java/parser/F.y":178  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("WHILE","while"));
-          f.add(yystack.valueAt (2)); f.add(yystack.valueAt (1));
-          yyval = f;
-        };
-  break;
-
-
-  case 37: /* return_form: tkLPAREN tkRETURN element tkRPAREN  */
-  if (yyn == 37)
-    /* "src/main/java/parser/F.y":189  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("RETURN","return"));
-          f.add(yystack.valueAt (1));
-          yyval = f;
-        };
-  break;
-
-
-  case 38: /* break_form: tkLPAREN tkBREAK tkRPAREN  */
-  if (yyn == 38)
-    /* "src/main/java/parser/F.y":200  */
-        {
-          List<Object> f = new ArrayList<>();
-          f.add(new parser.TokenValue("BREAK","break"));
-          yyval = f;
-        };
-  break;
-
-
-  case 39: /* function_call: tkLPAREN func_operator argument_list tkRPAREN  */
-  if (yyn == 39)
-    /* "src/main/java/parser/F.y":210  */
-        {
-          List<Object> call = new ArrayList<>();
-          call.add(new parser.TokenValue(yystack.valueAt (2).type(), yystack.valueAt (2).text()));
-          call.addAll(yystack.valueAt (1));
-          yyval = call;
-        };
-  break;
-
-
-  case 40: /* func_operator: tkPLUS  */
-  if (yyn == 40)
-    /* "src/main/java/parser/F.y":220  */
-                   { yyval = new parser.TokenValue("PLUS","plus"); };
-  break;
-
-
-  case 41: /* func_operator: tkMINUS  */
-  if (yyn == 41)
-    /* "src/main/java/parser/F.y":221  */
-                   { yyval = new parser.TokenValue("MINUS","minus"); };
-  break;
-
-
-  case 42: /* func_operator: tkTIMES  */
-  if (yyn == 42)
-    /* "src/main/java/parser/F.y":222  */
-                   { yyval = new parser.TokenValue("TIMES","times"); };
-  break;
-
-
-  case 43: /* func_operator: tkDIVIDE  */
-  if (yyn == 43)
-    /* "src/main/java/parser/F.y":223  */
-                   { yyval = new parser.TokenValue("DIVIDE","divide"); };
-  break;
-
-
-  case 44: /* func_operator: tkHEAD  */
-  if (yyn == 44)
-    /* "src/main/java/parser/F.y":224  */
-                   { yyval = new parser.TokenValue("HEAD","head"); };
-  break;
-
-
-  case 45: /* func_operator: tkTAIL  */
-  if (yyn == 45)
-    /* "src/main/java/parser/F.y":225  */
-                   { yyval = new parser.TokenValue("TAIL","tail"); };
-  break;
-
-
-  case 46: /* func_operator: tkCONS  */
-  if (yyn == 46)
-    /* "src/main/java/parser/F.y":226  */
-                   { yyval = new parser.TokenValue("CONS","cons"); };
-  break;
-
-
-  case 47: /* func_operator: tkEQUAL  */
-  if (yyn == 47)
-    /* "src/main/java/parser/F.y":227  */
-                   { yyval = new parser.TokenValue("EQUAL","equal"); };
-  break;
-
-
-  case 48: /* func_operator: tkNONEQUAL  */
-  if (yyn == 48)
-    /* "src/main/java/parser/F.y":228  */
-                   { yyval = new parser.TokenValue("NONEQUAL","nonequal"); };
-  break;
-
-
-  case 49: /* func_operator: tkLESS  */
-  if (yyn == 49)
-    /* "src/main/java/parser/F.y":229  */
-                   { yyval = new parser.TokenValue("LESS","less"); };
-  break;
-
-
-  case 50: /* func_operator: tkLESSEQ  */
-  if (yyn == 50)
-    /* "src/main/java/parser/F.y":230  */
-                   { yyval = new parser.TokenValue("LESSEQ","lesseq"); };
-  break;
-
-
-  case 51: /* func_operator: tkGREATER  */
-  if (yyn == 51)
-    /* "src/main/java/parser/F.y":231  */
-                   { yyval = new parser.TokenValue("GREATER","greater"); };
-  break;
-
-
-  case 52: /* func_operator: tkGREATEREQ  */
-  if (yyn == 52)
-    /* "src/main/java/parser/F.y":232  */
-                   { yyval = new parser.TokenValue("GREATEREQ","greatereq"); };
-  break;
-
-
-  case 53: /* func_operator: tkAND  */
-  if (yyn == 53)
-    /* "src/main/java/parser/F.y":233  */
-                   { yyval = new parser.TokenValue("AND","and"); };
-  break;
-
-
-  case 54: /* func_operator: tkOR  */
-  if (yyn == 54)
-    /* "src/main/java/parser/F.y":234  */
-                   { yyval = new parser.TokenValue("OR","or"); };
-  break;
-
-
-  case 55: /* func_operator: tkXOR  */
-  if (yyn == 55)
-    /* "src/main/java/parser/F.y":235  */
-                   { yyval = new parser.TokenValue("XOR","xor"); };
-  break;
-
-
-  case 56: /* func_operator: tkNOT  */
-  if (yyn == 56)
-    /* "src/main/java/parser/F.y":236  */
-                   { yyval = new parser.TokenValue("NOT","not"); };
-  break;
-
-
-  case 57: /* func_operator: tkISINT  */
-  if (yyn == 57)
-    /* "src/main/java/parser/F.y":237  */
-                   { yyval = new parser.TokenValue("ISINT","isint"); };
-  break;
-
-
-  case 58: /* func_operator: tkISREAL  */
-  if (yyn == 58)
-    /* "src/main/java/parser/F.y":238  */
-                   { yyval = new parser.TokenValue("ISREAL","isreal"); };
-  break;
-
-
-  case 59: /* func_operator: tkISBOOL  */
-  if (yyn == 59)
-    /* "src/main/java/parser/F.y":239  */
-                   { yyval = new parser.TokenValue("ISBOOL","isbool"); };
-  break;
-
-
-  case 60: /* func_operator: tkISNULL  */
-  if (yyn == 60)
-    /* "src/main/java/parser/F.y":240  */
-                   { yyval = new parser.TokenValue("ISNULL","isnull"); };
-  break;
-
-
-  case 61: /* func_operator: tkISATOM  */
-  if (yyn == 61)
-    /* "src/main/java/parser/F.y":241  */
-                   { yyval = new parser.TokenValue("ISATOM","isatom"); };
-  break;
-
-
-  case 62: /* func_operator: tkISLIST  */
-  if (yyn == 62)
-    /* "src/main/java/parser/F.y":242  */
-                   { yyval = new parser.TokenValue("ISLIST","islist"); };
-  break;
-
-
-  case 63: /* func_operator: tkEVAL  */
+  case 63: /* func_form: tkLPAREN tkFUNC atom list element tkRPAREN  */
   if (yyn == 63)
-    /* "src/main/java/parser/F.y":243  */
-                   { yyval = new parser.TokenValue("EVAL","eval"); };
+    /* "src/main/java/parser/F.y":159  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("FUNC", "func"));
+            form.add(yystack.valueAt (3));
+            form.add(yystack.valueAt (2));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
   break;
 
 
-  case 64: /* func_operator: tkIDENT  */
+  case 64: /* lambda_form: tkLPAREN tkLAMBDA list element tkRPAREN  */
   if (yyn == 64)
-    /* "src/main/java/parser/F.y":244  */
-                   { yyval = new parser.TokenValue("IDENTIFIER",yystack.valueAt (0)); };
+    /* "src/main/java/parser/F.y":171  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("LAMBDA", "lambda"));
+            form.add(yystack.valueAt (2));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
   break;
 
 
-  case 65: /* argument_list: %empty  */
+  case 65: /* prog_form: tkLPAREN tkPROG list list_elements tkRPAREN  */
   if (yyn == 65)
-    /* "src/main/java/parser/F.y":249  */
-                  { yyval = new ArrayList<Object>(); };
+    /* "src/main/java/parser/F.y":182  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("PROG", "prog"));
+            form.add(yystack.valueAt (2));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
   break;
 
 
-  case 66: /* argument_list: argument_list element  */
+  case 66: /* cond_form: tkLPAREN tkCOND element element tkRPAREN  */
   if (yyn == 66)
-    /* "src/main/java/parser/F.y":251  */
-        { ((List<Object>)yystack.valueAt (1)).add(yystack.valueAt (0)); yyval = yystack.valueAt (1); };
+    /* "src/main/java/parser/F.y":193  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("COND", "cond"));
+            form.add(yystack.valueAt (2));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
+  break;
+
+
+  case 67: /* cond_form: tkLPAREN tkCOND element element element tkRPAREN  */
+  if (yyn == 67)
+    /* "src/main/java/parser/F.y":201  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("COND", "cond"));
+            form.add(yystack.valueAt (3));
+            form.add(yystack.valueAt (2));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
+  break;
+
+
+  case 68: /* while_form: tkLPAREN tkWHILE element element tkRPAREN  */
+  if (yyn == 68)
+    /* "src/main/java/parser/F.y":213  */
+        {
+            List<Object> form= new ArrayList<Object>();
+            form.add(new parser.TokenValue("WHILE", "while"));
+            form.add(yystack.valueAt (2));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
+  break;
+
+
+  case 69: /* return_form: tkLPAREN tkRETURN element tkRPAREN  */
+  if (yyn == 69)
+    /* "src/main/java/parser/F.y":224  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("RETURN", "return"));
+            form.add(yystack.valueAt (1));
+            yyval = form;
+        };
+  break;
+
+
+  case 70: /* break_form: tkLPAREN tkBREAK tkRPAREN  */
+  if (yyn == 70)
+    /* "src/main/java/parser/F.y":234  */
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("BREAK", "break"));
+            yyval = form;
+        };
+  break;
+
+
+  case 78: /* arithmetic_function_call: tkLPAREN tkPLUS element element tkRPAREN  */
+  if (yyn == 78)
+    /* "src/main/java/parser/F.y":253  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("PLUS", "plus"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 79: /* arithmetic_function_call: tkLPAREN tkMINUS element element tkRPAREN  */
+  if (yyn == 79)
+    /* "src/main/java/parser/F.y":261  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("MINUS", "minus"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 80: /* arithmetic_function_call: tkLPAREN tkTIMES element element tkRPAREN  */
+  if (yyn == 80)
+    /* "src/main/java/parser/F.y":269  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("TIMES", "times"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 81: /* arithmetic_function_call: tkLPAREN tkDIVIDE element element tkRPAREN  */
+  if (yyn == 81)
+    /* "src/main/java/parser/F.y":277  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("DIVIDE", "divide"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 82: /* operation_on_list_call: tkLPAREN tkHEAD element tkRPAREN  */
+  if (yyn == 82)
+    /* "src/main/java/parser/F.y":288  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("HEAD", "head"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 83: /* operation_on_list_call: tkLPAREN tkTAIL element tkRPAREN  */
+  if (yyn == 83)
+    /* "src/main/java/parser/F.y":295  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("TAIL", "tail"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 84: /* operation_on_list_call: tkLPAREN tkCONS element element tkRPAREN  */
+  if (yyn == 84)
+    /* "src/main/java/parser/F.y":302  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("CONS", "cons"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 85: /* comparision_call: tkLPAREN tkEQUAL element element tkRPAREN  */
+  if (yyn == 85)
+    /* "src/main/java/parser/F.y":313  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("EQUAL", "equal"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 86: /* comparision_call: tkLPAREN tkNONEQUAL element element tkRPAREN  */
+  if (yyn == 86)
+    /* "src/main/java/parser/F.y":321  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("NONEQUAL", "nonequal"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 87: /* comparision_call: tkLPAREN tkLESS element element tkRPAREN  */
+  if (yyn == 87)
+    /* "src/main/java/parser/F.y":329  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("LESS", "less"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 88: /* comparision_call: tkLPAREN tkLESSEQ element element tkRPAREN  */
+  if (yyn == 88)
+    /* "src/main/java/parser/F.y":337  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("LESSEQ", "lesseq"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 89: /* comparision_call: tkLPAREN tkGREATER element element tkRPAREN  */
+  if (yyn == 89)
+    /* "src/main/java/parser/F.y":345  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("GREATER", "greater"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 90: /* comparision_call: tkLPAREN tkGREATEREQ element element tkRPAREN  */
+  if (yyn == 90)
+    /* "src/main/java/parser/F.y":353  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("GREATEREQ", "greatereq"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 91: /* predicate_call: tkLPAREN tkISINT element tkRPAREN  */
+  if (yyn == 91)
+    /* "src/main/java/parser/F.y":364  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("ISINT", "isint"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 92: /* predicate_call: tkLPAREN tkISREAL element tkRPAREN  */
+  if (yyn == 92)
+    /* "src/main/java/parser/F.y":371  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("ISREAL", "isreal"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 93: /* predicate_call: tkLPAREN tkISBOOL element tkRPAREN  */
+  if (yyn == 93)
+    /* "src/main/java/parser/F.y":378  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("ISBOOL", "isbool"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 94: /* predicate_call: tkLPAREN tkISNULL element tkRPAREN  */
+  if (yyn == 94)
+    /* "src/main/java/parser/F.y":385  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("ISNULL", "isnull"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 95: /* predicate_call: tkLPAREN tkISATOM element tkRPAREN  */
+  if (yyn == 95)
+    /* "src/main/java/parser/F.y":392  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("ISATOM", "isatom"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 96: /* predicate_call: tkLPAREN tkISLIST element tkRPAREN  */
+  if (yyn == 96)
+    /* "src/main/java/parser/F.y":399  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("ISLIST", "islist"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 97: /* logical_operation_call: tkLPAREN tkAND element element tkRPAREN  */
+  if (yyn == 97)
+    /* "src/main/java/parser/F.y":409  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("AND", "and"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 98: /* logical_operation_call: tkLPAREN tkOR element element tkRPAREN  */
+  if (yyn == 98)
+    /* "src/main/java/parser/F.y":417  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("OR", "or"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 99: /* logical_operation_call: tkLPAREN tkXOR element element tkRPAREN  */
+  if (yyn == 99)
+    /* "src/main/java/parser/F.y":425  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("XOR", "xor"));
+            call.add(yystack.valueAt (2));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 100: /* logical_operation_call: tkLPAREN tkNOT element tkRPAREN  */
+  if (yyn == 100)
+    /* "src/main/java/parser/F.y":433  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("NOT", "not"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 101: /* evaluation_call: tkLPAREN tkEVAL element tkRPAREN  */
+  if (yyn == 101)
+    /* "src/main/java/parser/F.y":443  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(new parser.TokenValue("EVAL", "eval"));
+            call.add(yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 102: /* generic_call: tkLPAREN atom argument_list tkRPAREN  */
+  if (yyn == 102)
+    /* "src/main/java/parser/F.y":453  */
+        {
+            List<Object> call = new ArrayList<Object>();
+            call.add(yystack.valueAt (2));
+            call.addAll((List<Object>) yystack.valueAt (1));
+            yyval = call;
+        };
+  break;
+
+
+  case 103: /* argument_list: %empty  */
+  if (yyn == 103)
+    /* "src/main/java/parser/F.y":462  */
+                                     { yyval = new ArrayList<Object>(); };
+  break;
+
+
+  case 104: /* argument_list: argument_list element  */
+  if (yyn == 104)
+    /* "src/main/java/parser/F.y":463  */
+                                     { ((List<Object>) yystack.valueAt (1)).add(yystack.valueAt (0)); yyval = yystack.valueAt (1); };
   break;
 
 
 
-/* "src/main/java/parser/FParser.java":997  */
+/* "src/main/java/parser/FParser.java":1422  */
 
         default: break;
       }
@@ -1405,26 +1830,36 @@ public class FParser
     return yyvalue == yytable_ninf_;
   }
 
-  private static final byte yypact_ninf_ = -42;
-  private static final byte yytable_ninf_ = -1;
+  private static final short yypact_ninf_ = -4;
+  private static final short yytable_ninf_ = -1;
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-  private static final byte[] yypact_ = yypact_init();
-  private static final byte[] yypact_init()
+  private static final short[] yypact_ = yypact_init();
+  private static final short[] yypact_init()
   {
-    return new byte[]
+    return new short[]
     {
-     -42,     1,   -42,    88,   -17,   -42,   -42,   -42,   -42,   -42,
-     -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,
-     -42,   -42,   -42,   -42,   -42,   -42,   -42,    46,     0,     0,
-      24,    24,    46,    46,    46,    25,   -42,   -42,   -42,   -42,
-     -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,
-     -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,
-     -42,     8,   -42,   -42,   -42,    26,    46,    24,    46,   -42,
-      46,    46,    37,   -42,   -42,   -42,    15,   -42,    40,    46,
-      41,    31,    55,    44,   -42,   -42,   -42,   -42,    52,   -42,
-     -42,   -42,    62,   -42,   -42,   -42
+      -4,     3,    -4,   379,   341,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,   301,   412,   412,     4,     4,   301,
+     301,   301,    -2,   301,   301,   301,   301,   301,   301,   301,
+     301,   301,   301,   301,   301,   301,   301,   301,   301,   301,
+     301,   301,   301,   301,   301,   301,   301,   141,    -4,    -4,
+      -4,    -4,    -4,    42,   301,     4,   301,    -4,   301,   301,
+      43,    -4,   301,   301,   301,   301,    44,    45,   301,   301,
+     301,   301,   301,   301,   301,    46,    47,    48,    49,    50,
+      51,   301,   301,   301,    52,    53,    -4,    -4,   181,    -4,
+      54,   301,    55,   221,   261,    56,    -4,    57,    58,    67,
+      92,    -4,    -4,    93,    94,    95,    96,    97,   100,   102,
+      -4,    -4,    -4,    -4,    -4,    -4,   105,   106,   111,    -4,
+      -4,    -4,    -4,    -4,   112,    -4,    -4,    -4,   120,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4
     };
   }
 
@@ -1436,16 +1871,26 @@ public class FParser
   {
     return new byte[]
     {
-       2,     0,     1,     7,     0,    14,    13,    12,    15,    17,
-       3,    11,     4,     9,    10,     5,    18,    20,    21,    22,
-      23,    24,    25,    26,    27,    28,    19,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,    40,    41,    42,    43,
-      44,    45,    46,    47,    48,    49,    50,    51,    52,    57,
-      58,    59,    60,    61,    62,    53,    54,    55,    56,    63,
-      64,     0,    65,    16,     7,     0,     0,     0,     0,     7,
-       0,     0,     0,    38,     6,     8,     0,    29,     0,     0,
-       0,     0,     0,     0,    37,    39,    66,    30,     0,    32,
-      33,    34,     0,    36,    31,    35
+       2,     0,     1,     5,     0,     9,     8,     7,    10,    11,
+      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    27,    28,    29,    30,    31,
+      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    47,    48,     3,    45,    49,    50,    51,
+      52,    53,    54,    55,    56,    57,    46,    71,    72,    73,
+      74,    75,    76,    77,     0,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
+      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,    42,     0,   103,     5,
+      58,    60,    59,     0,     0,     0,     0,     5,     0,     0,
+       0,    70,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     4,     6,     0,    61,
+       0,     0,     0,     0,     0,     0,    69,     0,     0,     0,
+       0,    82,    83,     0,     0,     0,     0,     0,     0,     0,
+      91,    92,    93,    94,    95,    96,     0,     0,     0,   100,
+     101,   102,   104,    62,     0,    64,    65,    66,     0,    68,
+      78,    79,    80,    81,    84,    85,    86,    87,    88,    89,
+      90,    97,    98,    99,    63,    67
     };
   }
 
@@ -1455,68 +1900,132 @@ public class FParser
   {
     return new byte[]
     {
-     -42,   -42,   -42,    16,   -41,    -1,   -42,   -26,   -42,   -42,
-     -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,   -42,
-     -42,   -42
+      -4,    -4,    -3,    18,   122,     1,    -1,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4
     };
   }
 
 /* YYDEFGOTO[NTERM-NUM].  */
-  private static final byte[] yydefgoto_ = yydefgoto_init();
-  private static final byte[] yydefgoto_init()
+  private static final short[] yydefgoto_ = yydefgoto_init();
+  private static final short[] yydefgoto_init()
   {
-    return new byte[]
+    return new short[]
     {
-       0,     1,    10,    11,    61,    75,    13,    14,    15,    16,
-      17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
-      62,    76
+       0,     1,    42,    97,    43,    44,   137,    46,    47,    48,
+      49,    50,    51,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    61,    62,    63,   138
     };
   }
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule whose
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
-  private static final byte[] yytable_ = yytable_init();
-  private static final byte[] yytable_init()
+  private static final short[] yytable_ = yytable_init();
+  private static final short[] yytable_init()
   {
-    return new byte[]
+    return new short[]
     {
-      12,     2,    66,    67,     3,     4,     4,     5,     6,     7,
-       8,    64,    74,     4,     5,     6,     7,     8,    64,    85,
-       4,     5,     6,     7,     8,    63,    65,    64,    81,    73,
-      77,    70,    71,    72,    64,    90,     4,     5,     6,     7,
-       8,    84,     9,     9,    87,    89,    68,    69,    93,    64,
-       9,     4,     5,     6,     7,     8,    94,     9,    64,    91,
-       4,     5,     6,     7,     8,    78,    95,    80,     0,    82,
-      83,     0,     0,     9,     0,    86,     0,     0,    88,     0,
-       0,    92,     0,    79,     0,     0,     0,     0,     9,     0,
-       0,     0,     0,    27,     0,     0,     0,     9,    28,    29,
-      30,    31,    32,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    45,    46,    47,    48,    49,
-      50,    51,    52,    53,    54,    55,    56,    57,    58,    59,
-      60
+      45,   100,   111,     2,    98,   102,     3,    99,     4,     5,
+       6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
+      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,   139,   146,   151,   152,
+     160,   161,   162,   163,   164,   165,   169,   170,   173,   175,
+     179,   180,   181,   103,   106,   107,   104,   105,   108,   109,
+     110,   182,   112,   113,   114,   115,   116,   117,   118,   119,
+     120,   121,   122,   123,   124,   125,   126,   127,   128,   129,
+     130,   131,   132,   133,   134,   135,   183,   184,   185,   186,
+     187,   188,   141,   140,   189,   142,   190,   144,   145,   191,
+     192,   147,   148,   149,   150,   193,   194,   153,   154,   155,
+     156,   157,   158,   159,   195,   143,   101,     0,     0,     0,
+     166,   167,   168,     0,     0,     0,     0,   172,     0,     0,
+     174,     0,     0,   178,     3,   136,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,     3,   171,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,     3,   176,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,     3,   177,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,     3,     0,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    99,     0,     0,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    64,     0,     0,     0,     0,    65,
+      66,    67,    68,    69,    70,    71,    72,    73,    74,    75,
+      76,    77,    78,    79,    80,    81,    82,    83,    84,    85,
+      86,    87,    88,    89,    90,    91,    92,    93,    94,    95,
+      96,    41,     9,    10,    11,    12,    13,    14,    15,    16,
+      17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
+      27,    28,    29,    30,    31,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41
     };
   }
 
-private static final byte[] yycheck_ = yycheck_init();
-  private static final byte[] yycheck_init()
+private static final short[] yycheck_ = yycheck_init();
+  private static final short[] yycheck_init()
   {
-    return new byte[]
+    return new short[]
     {
-       1,     0,    28,    29,     3,     5,     5,     6,     7,     8,
-       9,     3,     4,     5,     6,     7,     8,     9,     3,     4,
-       5,     6,     7,     8,     9,    42,    27,     3,    69,     4,
-       4,    32,    33,    34,     3,     4,     5,     6,     7,     8,
-       9,     4,    42,    42,     4,     4,    30,    31,     4,     3,
-      42,     5,     6,     7,     8,     9,     4,    42,     3,     4,
-       5,     6,     7,     8,     9,    66,     4,    68,    -1,    70,
-      71,    -1,    -1,    42,    -1,    76,    -1,    -1,    79,    -1,
-      -1,    82,    -1,    67,    -1,    -1,    -1,    -1,    42,    -1,
-      -1,    -1,    -1,     5,    -1,    -1,    -1,    42,    10,    11,
-      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
-      22,    23,    24,    25,    26,    27,    28,    29,    30,    31,
-      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
-      42
+       1,     4,     4,     0,     3,     4,     3,     3,     5,     6,
+       7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
+      17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
+      27,    28,    29,    30,    31,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,     4,     4,     4,     4,
+       4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
+       4,     4,     4,    64,    67,    68,    65,    66,    69,    70,
+      71,     4,    73,    74,    75,    76,    77,    78,    79,    80,
+      81,    82,    83,    84,    85,    86,    87,    88,    89,    90,
+      91,    92,    93,    94,    95,    96,     4,     4,     4,     4,
+       4,     4,   105,   104,     4,   106,     4,   108,   109,     4,
+       4,   112,   113,   114,   115,     4,     4,   118,   119,   120,
+     121,   122,   123,   124,     4,   107,     4,    -1,    -1,    -1,
+     131,   132,   133,    -1,    -1,    -1,    -1,   138,    -1,    -1,
+     141,    -1,    -1,   144,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,     3,    -1,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,     3,    -1,    -1,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,     5,    -1,    -1,    -1,    -1,    10,
+      11,    12,    13,    14,    15,    16,    17,    18,    19,    20,
+      21,    22,    23,    24,    25,    26,    27,    28,    29,    30,
+      31,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42
     };
   }
 
@@ -1527,16 +2036,26 @@ private static final byte[] yycheck_ = yycheck_init();
   {
     return new byte[]
     {
-       0,    44,     0,     3,     5,     6,     7,     8,     9,    42,
-      45,    46,    48,    49,    50,    51,    52,    53,    54,    55,
-      56,    57,    58,    59,    60,    61,    62,     5,    10,    11,
-      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
-      22,    23,    24,    25,    26,    27,    28,    29,    30,    31,
-      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
-      42,    47,    63,    42,     3,    48,    50,    50,    46,    46,
-      48,    48,    48,     4,     4,    48,    64,     4,    48,    46,
-      48,    47,    48,    48,     4,     4,    48,     4,    48,     4,
-       4,     4,    48,     4,     4,     4
+       0,    44,     0,     3,     5,     6,     7,     8,     9,    10,
+      11,    12,    13,    14,    15,    16,    17,    18,    19,    20,
+      21,    22,    23,    24,    25,    26,    27,    28,    29,    30,
+      31,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    45,    47,    48,    49,    50,    51,    52,    53,
+      54,    55,    56,    57,    58,    59,    60,    61,    62,    63,
+      64,    65,    66,    67,     5,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    46,    48,     3,
+      45,    47,    48,    49,    48,    48,    45,    45,    49,    49,
+      49,     4,    49,    49,    49,    49,    49,    49,    49,    49,
+      49,    49,    49,    49,    49,    49,    49,    49,    49,    49,
+      49,    49,    49,    49,    49,    49,     4,    49,    68,     4,
+      49,    45,    49,    46,    49,    49,     4,    49,    49,    49,
+      49,     4,     4,    49,    49,    49,    49,    49,    49,    49,
+       4,     4,     4,     4,     4,     4,    49,    49,    49,     4,
+       4,     4,    49,     4,    49,     4,     4,     4,    49,     4,
+       4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
+       4,     4,     4,     4,     4,     4
     };
   }
 
@@ -1546,13 +2065,17 @@ private static final byte[] yycheck_ = yycheck_init();
   {
     return new byte[]
     {
-       0,    43,    44,    44,    45,    45,    46,    47,    47,    48,
-      48,    48,    49,    49,    49,    49,    50,    50,    51,    51,
-      52,    52,    52,    52,    52,    52,    52,    52,    52,    53,
-      54,    55,    56,    57,    58,    58,    59,    60,    61,    62,
-      63,    63,    63,    63,    63,    63,    63,    63,    63,    63,
-      63,    63,    63,    63,    63,    63,    63,    63,    63,    63,
-      63,    63,    63,    63,    63,    64,    64
+       0,    43,    44,    44,    45,    46,    46,    47,    47,    47,
+      47,    48,    48,    48,    48,    48,    48,    48,    48,    48,
+      48,    48,    48,    48,    48,    48,    48,    48,    48,    48,
+      48,    48,    48,    48,    48,    48,    48,    48,    48,    48,
+      48,    48,    48,    48,    49,    49,    49,    49,    49,    50,
+      50,    50,    50,    50,    50,    50,    50,    50,    51,    51,
+      51,    51,    52,    53,    54,    55,    56,    56,    57,    58,
+      59,    60,    60,    60,    60,    60,    60,    60,    61,    61,
+      61,    61,    62,    62,    62,    63,    63,    63,    63,    63,
+      63,    64,    64,    64,    64,    64,    64,    65,    65,    65,
+      65,    66,    67,    68,    68
     };
   }
 
@@ -1562,13 +2085,17 @@ private static final byte[] yycheck_ = yycheck_init();
   {
     return new byte[]
     {
-       0,     2,     0,     2,     1,     1,     3,     0,     2,     1,
-       1,     1,     1,     1,     1,     1,     2,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     4,
-       5,     6,     5,     5,     5,     6,     5,     4,     3,     4,
+       0,     2,     0,     2,     3,     0,     2,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     0,     2
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     2,     2,
+       2,     4,     5,     6,     5,     5,     5,     6,     5,     4,
+       3,     1,     1,     1,     1,     1,     1,     1,     5,     5,
+       5,     5,     4,     4,     5,     5,     5,     5,     5,     5,
+       5,     4,     4,     4,     4,     4,     4,     5,     5,     5,
+       4,     4,     4,     0,     2
     };
   }
 
@@ -1627,7 +2154,7 @@ private static final byte[] yycheck_ = yycheck_init();
   }
 
 
-  private static final int YYLAST_ = 130;
+  private static final int YYLAST_ = 454;
   private static final int YYEMPTY_ = -2;
   private static final int YYFINAL_ = 2;
   private static final int YYNTOKENS_ = 43;
@@ -1639,6 +2166,6 @@ private static final byte[] yycheck_ = yycheck_init();
   private Object parseResult;
   public Object getParseResult() { return parseResult; }
 
-/* "src/main/java/parser/FParser.java":1643  */
+/* "src/main/java/parser/FParser.java":2170  */
 
 }

@@ -4,7 +4,7 @@
 (setq f (lambda (x) (plus x 1)))
 (f 4)
 
-(func chooser (p) (cond (less p 0) plus minus))
+(func chooser (p) (cond (less p 0) (plus 2 3) minus))
 (setq g (chooser -1))
 (g 10 3)
 
