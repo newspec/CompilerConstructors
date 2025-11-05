@@ -56,17 +56,25 @@ public class SemanticAnalyzer {
         ConstantFolder folder = new ConstantFolder();
         optimized = folder.fold(optimized);
         
-        // Optimization 2: Dead code elimination
+        // Optimization 2: Dead code elimination after return
         DeadCodeEliminator deadCodeElim = new DeadCodeEliminator();
         optimized = deadCodeElim.eliminate(optimized);
         
-        // Optimization 3: Conditional simplification
+        // Optimization 3: While loop simplification (remove dead while loops)
+        WhileLoopOptimizer whileOptimizer = new WhileLoopOptimizer();
+        optimized = whileOptimizer.optimize(optimized);
+        
+        // Optimization 4: Conditional simplification
         ConditionalSimplifier condSimplifier = new ConditionalSimplifier();
         optimized = condSimplifier.simplify(optimized);
         
-        // Optimization 4: Unused variable removal
+        // Optimization 5: Unused variable removal
         UnusedVariableRemover unusedRemover = new UnusedVariableRemover();
         optimized = unusedRemover.remove(optimized);
+        
+        // Optimization 6: Unused function removal
+        UnusedFunctionRemover unusedFuncRemover = new UnusedFunctionRemover();
+        optimized = unusedFuncRemover.remove(optimized);
         
         return optimized;
     }

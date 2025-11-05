@@ -1,0 +1,10 @@
+(less 3 5)
+(less 5 3)
+(greater 10 5)
+(lesseq 5 5)
+(greatereq 7 7)
+(equal 5 5)
+(equal 3 5)
+(nonequal 3 5)
+
+(less -3 3)
