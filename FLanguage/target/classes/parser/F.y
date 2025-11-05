@@ -48,12 +48,7 @@ literal
     ;
 
 atom
-    : tkQUOTE    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
-    | tkBOOL    { $$ = new parser.TokenValue("IDENTIFIER", $1); }   
-    | tkREAL    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
-    | tkINT { $$ = new parser.TokenValue("IDENTIFIER", $1); }
-    | tkNULL    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
-    | tkSETQ    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
+    : tkSETQ    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkFUNC    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkLAMBDA  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkPROG    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
@@ -61,25 +56,30 @@ atom
     | tkWHILE   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkRETURN  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkBREAK   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
+
     | tkPLUS    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkMINUS   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkTIMES   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkDIVIDE  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
+
     | tkHEAD    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkTAIL    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkCONS    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
+
     | tkEQUAL   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkNONEQUAL    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkLESS    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkLESSEQ  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkGREATER { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkGREATEREQ   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
+
     | tkISINT   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkISREAL  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkISBOOL  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkISNULL  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkISATOM  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkISLIST  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
+
     | tkAND { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkOR  { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkXOR { $$ = new parser.TokenValue("IDENTIFIER", $1); }
@@ -87,6 +87,7 @@ atom
     | tkEVAL    { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     | tkIDENT   { $$ = new parser.TokenValue("IDENTIFIER", $1); }
     ;
+
 
 element
     : list     { $$ = $1; }
@@ -109,7 +110,21 @@ special_form
     ;
 
 quote_form
-    : tkQUOTE element
+    : tkQUOTE list
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("QUOTE", "quote"));
+            form.add($2);
+            $$ = form;
+        }
+    | tkQUOTE atom
+        {
+            List<Object> form = new ArrayList<Object>();
+            form.add(new parser.TokenValue("QUOTE", "quote"));
+            form.add($2);
+            $$ = form;
+        }
+    | tkQUOTE literal
         {
             List<Object> form = new ArrayList<Object>();
             form.add(new parser.TokenValue("QUOTE", "quote"));
@@ -124,6 +139,9 @@ quote_form
             $$ = form;
         }
     ;
+
+
+
 
 setq_form
     : tkLPAREN tkSETQ atom element tkRPAREN
