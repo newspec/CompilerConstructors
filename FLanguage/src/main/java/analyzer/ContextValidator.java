@@ -7,9 +7,6 @@ import parser.TokenValue;
  * Validates context-sensitive keywords:
  * - 'return' can only appear inside func or lambda (tracked by functionDepth)
  * - 'break' can only appear inside while loop (tracked by loopDepth)
- *
- * Fix: correctly handle lists that are "wrappers" (first element is a List)
- * so that we iterate their elements starting from 0, not always from 1.
  */
 public class ContextValidator {
     private int functionDepth = 0;  // tracks func/lambda/prog nesting (used for return)

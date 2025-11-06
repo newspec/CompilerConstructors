@@ -13,3 +13,4 @@
 (func Zero () 0)
 (Zero)
 
+(func zero () 0)

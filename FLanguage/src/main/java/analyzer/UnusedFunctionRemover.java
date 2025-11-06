@@ -9,10 +9,9 @@ import parser.TokenValue;
 /**
  * Removes unused function definitions.
  *
- * Fixes:
- *  - Normalizes function names to lower-case for comparisons.
- *  - When collecting calls, visits all top-level elements (including func defs)
- *    so calls inside function bodies are discovered.
+ * Important behavior:
+ * - Function names are stored and compared in their original form (case-sensitive).
+ * - Recognition of special forms (func, lambda, quote, ...) is done case-insensitively.
  */
 public class UnusedFunctionRemover {
 
@@ -21,7 +20,7 @@ public class UnusedFunctionRemover {
 
         List<?> program = (List<?>) ast;
 
-        // First pass: collect all function definitions (normalized to lower-case)
+        // First pass: collect all function definitions (store names as-is, case-sensitive)
         Set<String> definedFunctions = new HashSet<>();
         Set<String> calledFunctions = new HashSet<>();
 
@@ -29,7 +28,7 @@ public class UnusedFunctionRemover {
             if (isFunctionDefinition(element)) {
                 String funcName = extractFunctionName(element);
                 if (funcName != null) {
-                    definedFunctions.add(funcName.toLowerCase());
+                    definedFunctions.add(funcName); // keep original case
                 }
             }
         }
@@ -45,9 +44,8 @@ public class UnusedFunctionRemover {
             if (isFunctionDefinition(element)) {
                 String funcName = extractFunctionName(element);
                 if (funcName != null) {
-                    String lname = funcName.toLowerCase();
-                    if (calledFunctions.contains(lname)) {
-                        optimized.add(element); // function is used somewhere
+                    if (calledFunctions.contains(funcName)) {
+                        optimized.add(element); // function is used somewhere (exact match)
                     } else {
                         // skip unused function (i.e. remove it)
                     }
@@ -64,7 +62,8 @@ public class UnusedFunctionRemover {
     }
 
     /**
-     * Checks if an element is a function definition
+     * Checks if an element is a function definition.
+     * Uses case-insensitive check for the 'func' operator.
      */
     private boolean isFunctionDefinition(Object element) {
         if (!(element instanceof List<?>)) return false;
@@ -72,7 +71,7 @@ public class UnusedFunctionRemover {
         if (list.isEmpty()) return false;
 
         String opName = getOperatorName(list.get(0));
-        return "func".equals(opName) && list.size() > 1;
+        return opName != null && opName.equalsIgnoreCase("func") && list.size() > 1;
     }
 
     /**
@@ -84,12 +83,12 @@ public class UnusedFunctionRemover {
         if (list.size() < 2) return null;
 
         String opName = getOperatorName(list.get(0));
-        if (!"func".equals(opName)) return null;
+        if (opName == null || !opName.equalsIgnoreCase("func")) return null;
 
         Object nameObj = list.get(1);
         if (nameObj instanceof TokenValue) {
             TokenValue tv = (TokenValue) nameObj;
-            if (tv.value != null) return tv.value.toString();
+            if (tv.value != null) return tv.value.toString(); // keep case as-is
             if (tv.type != null) return tv.type.toString();
         }
         return null;
@@ -97,8 +96,12 @@ public class UnusedFunctionRemover {
 
     /**
      * Recursively collects all function calls in the AST.
-     * - called: set where we add lower-cased function names that are called.
-     * - defined: set of lower-cased defined function names (for recognition)
+     *
+     * - called: set where we add function names that are called (stored as original-case strings)
+     * - defined: set of defined function names (stored as original-case strings)
+     *
+     * Matching a call against a defined function is done by exact string match
+     * (case-sensitive), i.e. a call "Zero" matches a definition "Zero" but not "zero".
      */
     private void collectCalledFunctions(Object element, Set<String> called, Set<String> defined) {
         if (element instanceof List<?>) {
@@ -106,30 +109,30 @@ public class UnusedFunctionRemover {
             if (list.isEmpty()) return;
 
             Object first = list.get(0);
-            String opName = getOperatorName(first);
+            String opName = getOperatorName(first); // raw operator name (original case if TokenValue.value exists)
             boolean firstIsToken = first instanceof TokenValue;
 
-            // If the first element is a token and matches a defined function name, it's a call
-            if (firstIsToken) {
-                String opnameLower = opName != null ? opName.toLowerCase() : "";
-                if (defined.contains(opnameLower)) {
-                    called.add(opnameLower);
+            // If the first element is a token and its exact name matches a defined function, it's a call
+            if (firstIsToken && opName != null) {
+                if (defined.contains(opName)) {
+                    called.add(opName); // store call with the exact case found in AST
                 }
             }
 
             // Recurse into bodies appropriately:
             // - If it's a func definition, inspect its body (index 3) too (so calls inside functions count)
-            if ("func".equals(opName)) {
+            String opNameLower = opName == null ? "" : opName.toLowerCase();
+            if ("func".equals(opNameLower)) {
                 if (list.size() > 3) {
                     collectCalledFunctions(list.get(3), called, defined);
                 }
-                // don't return here — we may also want to process other parts if necessary
-            } else if ("lambda".equals(opName)) {
+                // continue to recurse other parts as well
+            } else if ("lambda".equals(opNameLower)) {
                 if (list.size() > 2) {
                     collectCalledFunctions(list.get(2), called, defined);
                 }
-                // continue recursion below
-            } else if ("quote".equals(opName)) {
+                // continue
+            } else if ("quote".equals(opNameLower)) {
                 // do not recurse inside quote
                 return;
             }
@@ -144,16 +147,20 @@ public class UnusedFunctionRemover {
     }
 
     /**
-     * Gets operator name from first element (lowercasing occurs where used).
+     * Gets operator name from first element.
+     *
+     * IMPORTANT: this returns the token value *as-is* (preserves case) when possible.
+     * For control/keyword comparisons we use equalsIgnoreCase / toLowerCase() at call sites.
+     * If first is a List, returns empty string.
      */
     private String getOperatorName(Object first) {
         if (first == null) return "";
         if (first instanceof TokenValue) {
             TokenValue tv = (TokenValue) first;
-            if (tv.value != null) return tv.value.toString().toLowerCase().trim();
-            if (tv.type != null) return tv.type.toString().toLowerCase().trim();
+            if (tv.value != null) return tv.value.toString(); // preserve case
+            if (tv.type != null) return tv.type.toString();
         }
         if (first instanceof List<?>) return "";
-        return first.toString().toLowerCase().trim();
+        return first.toString();
     }
 }

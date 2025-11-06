@@ -62,7 +62,7 @@ public class Main {
             if (!result.warnings.isEmpty()) {
                 System.out.println("Warnings:");
                 for (String warning : result.warnings) {
-                    System.out.println("  ⚠ " + warning);
+                    System.out.println("    " + warning);
                 }
             } else {
                 System.out.println("No warnings");
@@ -72,7 +72,7 @@ public class Main {
             if (result.hasErrors()) {
                 System.err.println("Semantic errors:");
                 for (String error : result.errors) {
-                    System.err.println("  ✗ " + error);
+                    System.err.println("    " + error);
                 }
                 System.exit(1);
             }
@@ -81,7 +81,6 @@ public class Main {
             System.out.println("\n=== OPTIMIZED AST ===");
             printAST(result.optimizedAST, 0);
 
-            System.out.println("\n✓ Compilation successful");
 
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
