@@ -1,6 +1,6 @@
 (prog ()
   (while (greater 0 1) (setq x 1))
-  99)
+  (plus 98 1))
 
 (prog ()
   (setq i 0)

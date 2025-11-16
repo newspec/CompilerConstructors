@@ -1,0 +1,5 @@
+(plus 2 3)                    
+(minus 10 4)                  
+(times 5 3)                   
+(divide 20 4)                 
+(plus 1.5 2.5)              

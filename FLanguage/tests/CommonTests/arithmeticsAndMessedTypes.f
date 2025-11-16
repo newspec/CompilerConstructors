@@ -9,3 +9,5 @@
 (equal '(1 2) '(1 2))
 
 (xor (nonequal 1 2) (isint 1))
+
+(and (isint 1) (equal 3 3))

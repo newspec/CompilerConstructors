@@ -1,0 +1,13 @@
+(func earlyReturn (x)
+  (prog ()
+    (cond (greater x 0) (return 100))
+    (return 200)))
+(earlyReturn 5)
+
+(prog ()
+  (setq i 0)
+  (while (less i 10)
+    (prog ()
+      (setq i (plus i 1))
+      (cond (equal i 5) (break))))
+  i)
