@@ -1,0 +1,5 @@
+(cond true 10)
+(cond false 10)
+(cond false 10 20)
+(cond (greater 5 3) 100 200)
+(cond true (cond false 1 2) 3)

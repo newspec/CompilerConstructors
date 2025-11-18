@@ -1,7 +1,7 @@
-(cons 1 null)
+(cons 1 '())
 
 (prog ()
-  (setq s (cons 42 null))
+  (setq s (cons 42 '()))
   (head s)
   (tail s))
 

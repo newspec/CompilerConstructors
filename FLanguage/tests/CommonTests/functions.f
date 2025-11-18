@@ -5,7 +5,7 @@
 (f 4)
 
 (func chooser (p) (cond (less p 0) (plus 2 3) minus))
-(setq g (chooser -1))
+(setq g (chooser 2))
 (g 10 3)
 
 (prog ()

@@ -12,9 +12,12 @@ public class FParserWrapper {
     private FParser parser;
     private List<String> errors;
     private Object parseResult;
+    private ErrorCapturingScanner errorCapturingScanner;
     
     public FParserWrapper(FScanner scanner) {
-        this.parser = new FParser(scanner);
+        // Оборачиваем сканер для захвата ошибок
+        this.errorCapturingScanner = new ErrorCapturingScanner(scanner);
+        this.parser = new FParser(errorCapturingScanner);
         this.errors = new ArrayList<>();
     }
     
@@ -24,6 +27,9 @@ public class FParserWrapper {
     public boolean parse() throws IOException {
         try {
             boolean result = parser.parse();
+            
+            // Собираем ошибки из сканера
+            errors.addAll(errorCapturingScanner.getErrors());
             
             // Используем рефлексию для доступа к приватному полю parseResult
             try {
@@ -68,5 +74,38 @@ public class FParserWrapper {
      */
     public void addError(String error) {
         errors.add(error);
+    }
+    
+    /**
+     * Внутренний класс для захвата ошибок парсера
+     */
+    private static class ErrorCapturingScanner implements parser.FParser.Lexer {
+        private final FScanner scanner;
+        private final List<String> errors;
+        
+        public ErrorCapturingScanner(FScanner scanner) {
+            this.scanner = scanner;
+            this.errors = new ArrayList<>();
+        }
+        
+        @Override
+        public int yylex() throws IOException {
+            return scanner.yylex();
+        }
+        
+        @Override
+        public Object getLVal() {
+            return scanner.getLVal();
+        }
+        
+        @Override
+        public void yyerror(String s) {
+            errors.add(s);
+            scanner.yyerror(s);
+        }
+        
+        public List<String> getErrors() {
+            return errors;
+        }
     }
 }

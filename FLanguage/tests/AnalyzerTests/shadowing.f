@@ -7,3 +7,4 @@ a
 (prog (x)
   (setq x 5)
   x)
+x
