@@ -51,30 +51,40 @@ public class BuiltinArityChecker {
     }
     
     private void checkRecursive(Object element) throws SemanticException {
-        if (element instanceof List) {
-            List<?> list = (List<?>) element;
-            if (list.isEmpty()) return;
-            
-            Object first = list.get(0);
-            
-            if (first instanceof TokenValue) {
-                TokenValue tv = (TokenValue) first;
-                String opName = getOperatorName(tv);
-                
-                if (BUILTIN_ARITIES.containsKey(opName)) {
-                    int expected = BUILTIN_ARITIES.get(opName);
-                    int actual = list.size() - 1;
-                    if (expected != actual) {
-                        throw new SemanticException(
-                            String.format("Built-in function '%s' expects %d arguments but got %d",
-                                opName, expected, actual));
-                    }
+        if (!(element instanceof List)) {
+            return;
+        }
+
+        List<?> list = (List<?>) element;
+        if (list.isEmpty()) {
+            return;
+        }
+
+        Object first = list.get(0);
+        if (first instanceof TokenValue) {
+            TokenValue tv = (TokenValue) first;
+            String opName = getOperatorName(tv); // уже есть в классе
+
+            // ВАЖНО: не проверяем ничего внутри (quote ...)
+            if ("quote".equals(opName)) {
+                return;
+            }
+
+            // Проверка арности встроенных функций только вне quote
+            if (BUILTIN_ARITIES.containsKey(opName)) {
+                int expected = BUILTIN_ARITIES.get(opName);
+                int actual = list.size() - 1;
+                if (expected != actual) {
+                    throw new SemanticException(
+                        String.format("Built-in function '%s' expects %d arguments but got %d",
+                                    opName, expected, actual));
                 }
             }
-            
-            for (int i = 1; i < list.size(); i++) {
-                checkRecursive(list.get(i));
-            }
+        }
+
+        // Рекурсивно проверяем аргументы
+        for (int i = 1; i < list.size(); i++) {
+            checkRecursive(list.get(i));
         }
     }
     

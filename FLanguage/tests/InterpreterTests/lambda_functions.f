@@ -1,0 +1,7 @@
+(lambda (x) (times x 2))
+(setq myFunc (lambda (x) (plus x 10)))
+(myFunc 5)
+(setq chooser (lambda (p) (cond (less p 0) minus plus)))
+((chooser -1) 10 3)
+((chooser 1) 10 3)
+((lambda (x) (lambda (y) (plus x y))) 5 3)

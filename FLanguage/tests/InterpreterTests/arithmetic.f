@@ -1,0 +1,6 @@
+(plus 2 3)
+(minus 10 4)
+(times 6 7)
+(divide 20 4)
+(divide 10 3)
+(plus (times 2 3) (minus 10 5))

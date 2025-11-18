@@ -36,10 +36,18 @@ public class Interpreter {
     public static class UserFunction {
         public final List<?> params;
         public final Object body;
+        public final Map<String, Object> closure;  // НОВОЕ: сохраняем контекст
         
         public UserFunction(List<?> params, Object body) {
             this.params = params;
             this.body = body;
+            this.closure = null;  // Без closure по умолчанию
+        }
+        
+        public UserFunction(List<?> params, Object body, Map<String, Object> closure) {
+            this.params = params;
+            this.body = body;
+            this.closure = closure;  // С сохранённым контекстом
         }
     }
     
@@ -110,7 +118,6 @@ public class Interpreter {
      */
     private Object evaluate(Object element) {
         try {
-            // Null check
             if (element == null) {
                 return null;
             }
@@ -119,12 +126,10 @@ public class Interpreter {
             if (element instanceof String) {
                 String name = (String) element;
                 
-                // Check if it's a built-in function name
                 if (isBuiltinFunction(name)) {
                     return new BuiltinFunction(name);
                 }
                 
-                // Otherwise try to look up as variable
                 Object value = lookupVariable(name);
                 if (value == null) {
                     throw new RuntimeException("Undefined variable: " + name);
@@ -145,7 +150,11 @@ public class Interpreter {
                 Object first = list.get(0);
                 String opName = getOperatorName(first);
                 
-                // If no operator name, it's just an empty expression
+                // Handle computed expressions like ((myFunc -1) 1 2)
+                if ("__computed_operator__".equals(opName)) {
+                    return handleFunctionCall(list);
+                }
+                
                 if (opName == null || opName.isEmpty()) {
                     return null;
                 }
@@ -171,7 +180,6 @@ public class Interpreter {
                     case "break":
                         return handleBreak(list);
                     default:
-                        // Regular function call
                         return handleFunctionCall(list);
                 }
             }
@@ -369,7 +377,14 @@ public class Interpreter {
             List<?> params = extractList(list.get(1));
             Object body = list.get(2);
             
-            return new UserFunction(params, body);
+            // Сохраняем текущий контекст (closure)
+            Map<String, Object> capturedContext = new HashMap<>();
+            for (Map<String, Object> context : contextStack) {
+                capturedContext.putAll(context);
+            }
+            capturedContext.putAll(globalContext);
+            
+            return new UserFunction(params, body, capturedContext);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -410,19 +425,31 @@ public class Interpreter {
                         List<?> elements = (List<?>) bodyElement;
                         for (Object element : elements) {
                             result = evaluate(element);
-                            if (returnFlag) break;
+                            if (returnFlag || breakFlag) break;
                         }
                     } else {
                         // Single element
                         result = evaluate(bodyElement);
                     }
                     
-                    if (returnFlag) break;
+                    if (returnFlag || breakFlag) break;
                 }
             } finally {
                 // Pop context (always happens, even on error)
                 contextStack.pop();
             }
+            
+            // Handle return inside prog
+            // If return was called inside prog, handle it locally and don't propagate
+            if (returnFlag) {
+                Object returnedValue = returnValue;
+                returnFlag = false;
+                returnValue = null;
+                return returnedValue;
+            }
+            
+            // breakFlag НЕ сбрасываем - он должен пропагироваться в while
+            // и другие управляющие конструкции
             
             return result;
         } catch (RuntimeException e) {
@@ -431,6 +458,7 @@ public class Interpreter {
             throw new RuntimeException("Error in prog: " + e.getMessage(), e);
         }
     }
+
     
     /**
      * ( cond Element1 Element2 [ Element3 ] )
@@ -543,6 +571,7 @@ public class Interpreter {
     
     /**
      * Handles function calls (both built-in and user-defined)
+     * Supports computed function expressions like ((lambda (x) ...) 5)
      */
     private Object handleFunctionCall(List<?> list) {
         try {
@@ -551,24 +580,52 @@ public class Interpreter {
             }
             
             Object firstElem = list.get(0);
-            String funcName = getOperatorName(firstElem);
             
-            // If we have a name to work with
+            // If first element is a list (expression), evaluate it to get the function
+            Object operator = firstElem;
+            if (firstElem instanceof List) {
+                operator = evaluate(firstElem);
+            }
+            
+            // Now operator might be a function or a function name
+            if (operator instanceof BuiltinFunction) {
+                String builtinName = ((BuiltinFunction) operator).name;
+                
+                List<Object> args = new ArrayList<>();
+                for (int i = 1; i < list.size(); i++) {
+                    args.add(evaluate(list.get(i)));
+                }
+                
+                Object result = callBuiltinFunction(builtinName, args);
+                if (result != null || isBuiltinFunction(builtinName)) {
+                    return result;
+                }
+                throw new RuntimeException("Failed to call built-in function: " + builtinName);
+            }
+            
+            if (operator instanceof UserFunction) {
+                List<Object> args = new ArrayList<>();
+                for (int i = 1; i < list.size(); i++) {
+                    args.add(evaluate(list.get(i)));
+                }
+                return callUserFunction((UserFunction) operator, args);
+            }
+            
+            // If operator is a string or TokenValue, try as function name
+            String funcName = getOperatorName(operator);
+            
             if (funcName != null && !funcName.isEmpty()) {
-                // First, try to look up as a variable/function
+                // Try to look up as variable/function
                 Object resolvedValue = lookupVariable(funcName);
                 
-                // If found and it's a callable object
                 if (resolvedValue instanceof BuiltinFunction) {
                     String builtinName = ((BuiltinFunction) resolvedValue).name;
                     
-                    // Evaluate all arguments
                     List<Object> args = new ArrayList<>();
                     for (int i = 1; i < list.size(); i++) {
                         args.add(evaluate(list.get(i)));
                     }
                     
-                    // Call the built-in function
                     Object result = callBuiltinFunction(builtinName, args);
                     if (result != null || isBuiltinFunction(builtinName)) {
                         return result;
@@ -577,7 +634,6 @@ public class Interpreter {
                 }
                 
                 if (resolvedValue instanceof UserFunction) {
-                    // Evaluate all arguments
                     List<Object> args = new ArrayList<>();
                     for (int i = 1; i < list.size(); i++) {
                         args.add(evaluate(list.get(i)));
@@ -585,14 +641,12 @@ public class Interpreter {
                     return callUserFunction((UserFunction) resolvedValue, args);
                 }
                 
-                // If resolvedValue is not null but not a function, it's an error
                 if (resolvedValue != null && !(resolvedValue instanceof BuiltinFunction) && !(resolvedValue instanceof UserFunction)) {
                     throw new RuntimeException("Variable '" + funcName + "' is not a function, got: " + getTypeName(resolvedValue));
                 }
                 
                 // If not found as variable, try as built-in function
                 if (isBuiltinFunction(funcName)) {
-                    // Evaluate all arguments
                     List<Object> args = new ArrayList<>();
                     for (int i = 1; i < list.size(); i++) {
                         args.add(evaluate(list.get(i)));
@@ -604,7 +658,6 @@ public class Interpreter {
                     }
                 }
                 
-                // If still not found, error
                 throw new RuntimeException("Undefined function: " + funcName);
             }
             
@@ -756,6 +809,8 @@ public class Interpreter {
     
     /**
      * Calls user-defined functions. Throws RuntimeException on any error.
+     * Supports partial application - if more args than params, calls function
+     * with remaining args applied to result.
      */
     private Object callUserFunction(UserFunction func, List<Object> args) {
         try {
@@ -766,38 +821,81 @@ public class Interpreter {
             try {
                 // Bind parameters
                 List<?> params = func.params;
+                
+                // НОВОЕ: поддержка частичного применения
+                if (args.size() > params.size()) {
+                    // Вызываем функцию с нужным количеством аргументов
+                    List<Object> boundArgs = new ArrayList<>(args.subList(0, params.size()));
+                    List<Object> remainingArgs = new ArrayList<>(args.subList(params.size(), args.size()));
+                    
+                    // Вызываем функцию с первыми N аргументами
+                    Object intermediateResult = callUserFunctionWithArity(func, boundArgs);
+                    
+                    // Если результат это функция, применяем оставшиеся аргументы
+                    if (intermediateResult instanceof BuiltinFunction) {
+                        String builtinName = ((BuiltinFunction) intermediateResult).name;
+                        return callBuiltinFunction(builtinName, remainingArgs);
+                    }
+                    if (intermediateResult instanceof UserFunction) {
+                        return callUserFunction((UserFunction) intermediateResult, remainingArgs);
+                    }
+                    
+                    // Иначе просто возвращаем результат
+                    return intermediateResult;
+                }
+                
                 if (args.size() != params.size()) {
                     throw new RuntimeException("Function expects " + params.size() + 
                         " arguments, got " + args.size());
                 }
                 
-                for (int i = 0; i < params.size(); i++) {
-                    String paramName = extractIdentifier(params.get(i));
-                    localContext.put(paramName, args.get(i));
-                }
-                
-                // Execute function body
-                Object result = null;
-                if (func.body != null) {
-                    result = evaluate(func.body);
-                }
-                
-                // Handle return flag
-                if (returnFlag) {
-                    returnFlag = false;
-                    result = returnValue;
-                    returnValue = null;
-                }
-                
-                return result;
+                return callUserFunctionWithArity(func, args);
             } finally {
-                // Pop context (always happens)
                 contextStack.pop();
             }
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Error calling user-defined function: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Helper method to call user function with exact arity
+     */
+    private Object callUserFunctionWithArity(UserFunction func, List<Object> args) {
+        Map<String, Object> localContext = new HashMap<>();
+        
+        // Если есть closure, добавляем её переменные (но не перезаписываем параметры)
+        if (func.closure != null) {
+            localContext.putAll(func.closure);
+        }
+        
+        contextStack.push(localContext);
+        
+        try {
+            List<?> params = func.params;
+            
+            // Параметры перезаписывают переменные из closure
+            for (int i = 0; i < params.size(); i++) {
+                String paramName = extractIdentifier(params.get(i));
+                localContext.put(paramName, args.get(i));
+            }
+            
+            Object result = null;
+            if (func.body != null) {
+                result = evaluate(func.body);
+            }
+            
+            if (returnFlag) {
+                returnFlag = false;
+                result = returnValue;
+                returnValue = null;
+            }
+            
+            return result;
+        } finally {
+            contextStack.pop();
         }
     }
     
@@ -854,17 +952,27 @@ public class Interpreter {
      */
     private void setVariable(String name, Object value) {
         try {
-            // If in local context and variable exists there, update it
-            if (!contextStack.isEmpty()) {
-                Map<String, Object> localContext = contextStack.peek();
-                if (localContext.containsKey(name)) {
-                    localContext.put(name, value);
+            // Check local contexts first (LIFO) - update if exists
+            for (Map<String, Object> context : contextStack) {
+                if (context.containsKey(name)) {
+                    context.put(name, value);
                     return;
                 }
             }
             
-            // Otherwise, add to or update global context
-            globalContext.put(name, value);
+            // Check global context
+            if (globalContext.containsKey(name)) {
+                globalContext.put(name, value);
+                return;
+            }
+            
+            // If not found anywhere, create in current local context
+            // or in global if no local contexts
+            if (!contextStack.isEmpty()) {
+                contextStack.peek().put(name, value);
+            } else {
+                globalContext.put(name, value);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Error setting variable '" + name + "': " + e.getMessage(), e);
         }
@@ -947,12 +1055,16 @@ public class Interpreter {
                 return "";
             }
             
+            // If first is a list, it's a computed expression
+            if (first instanceof List) {
+                return "__computed_operator__";
+            }
+            
             if (first instanceof TokenValue) {
                 TokenValue tv = (TokenValue) first;
                 if (tv.value instanceof String) {
                     return (String) tv.value;
                 }
-                // Для других типов токенов (PLUS, MINUS и т.д.)
                 return tv.type.toLowerCase();
             }
             
