@@ -36,7 +36,7 @@ public class Interpreter {
     public static class UserFunction {
         public final List<?> params;
         public final Object body;
-        public final Map<String, Object> closure;  // НОВОЕ: сохраняем контекст
+        public final Map<String, Object> closure;  //сохраняем контекст
         
         public UserFunction(List<?> params, Object body) {
             this.params = params;
@@ -670,7 +670,7 @@ public class Interpreter {
     }
     
     /**
-     * Calls built-in functions (case-sensitive). Throws RuntimeException on any error.
+     * Calls built-in functions. Throws RuntimeException on any error.
      */
     private Object callBuiltinFunction(String name, List<Object> args) {
         try {
@@ -723,7 +723,7 @@ public class Interpreter {
                 return result;
             }
             
-            // Comparison functions (case-sensitive)
+            // Comparison functions
             if ("equal".equals(name)) {
                 checkArity(name, args, 2);
                 return compareValues(args.get(0), args.get(1));
@@ -749,7 +749,7 @@ public class Interpreter {
                 return toNumber(args.get(0)) >= toNumber(args.get(1));
             }
             
-            // Type predicates (case-sensitive)
+            // Type predicates
             if ("isint".equals(name)) {
                 checkArity(name, args, 1);
                 return args.get(0) instanceof Integer;
@@ -775,7 +775,7 @@ public class Interpreter {
                 return args.get(0) instanceof List;
             }
             
-            // Logical operators (case-sensitive)
+            // Logical operators
             if ("and".equals(name)) {
                 checkArity(name, args, 2);
                 return toBoolean(args.get(0)) && toBoolean(args.get(1));
@@ -822,7 +822,7 @@ public class Interpreter {
                 // Bind parameters
                 List<?> params = func.params;
                 
-                // НОВОЕ: поддержка частичного применения
+                //поддержка частичного применения
                 if (args.size() > params.size()) {
                     // Вызываем функцию с нужным количеством аргументов
                     List<Object> boundArgs = new ArrayList<>(args.subList(0, params.size()));
@@ -1094,7 +1094,7 @@ public class Interpreter {
     }
     
     /**
-     * Checks if function name is built-in (case-sensitive).
+     * Checks if function name is built-in.
      */
     private boolean isBuiltinFunction(String name) {
         return name.matches("plus|minus|times|divide|head|tail|cons|equal|nonequal|" +

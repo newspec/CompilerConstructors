@@ -30,4 +30,6 @@
     a))
 (fibonacciWithProg 7)
 
+((lambda (p) (cond (less p 0) plus minus)) +1 1 2)
+
 (inner 1)
